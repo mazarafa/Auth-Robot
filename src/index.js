@@ -1,44 +1,20 @@
-const puppeteer = require ('puppeteer');
-const fs = require('fs');
-const config = require('./config.json');
-const cookies = require('./cookies.json');
+const puppeteer = require('puppeteer');
+require('dotenv').config({path:'.env'});
 
-(async() => {
+let login = 'https://m.facebook.com';
+let user = process.env.USUARIO;
+let pass = process.env.SENHA;
 
-    let browser = await puppeteer.launch({headless:false});
+(async ()=>{
+    let browser = await puppeteer.launch({
+        headless:false
+    })
     let page = await browser.newPage();
-   
-    if(Object.keys(cookies).length){
-
-        await page.setCookie(...cookies);
-
-        await page.goto('https://www.facebook.com/',{waitUntil:'networkidle2'});
-    }else{
-        await page.goto('https://www.facebook.com/login/',{waitUntil:'networkidle0'});
-
-        await page.type('#email', config.username,{delay:30});
-        await page.type('#pass', config.password,{delay:30});
-
-
-        await page.click("#loginbutton");
-
-        await page.waitForNavigation({waitUntil:'networkidle0'});
-        await page.waitFor(15000);
-
-        try{
-            await page.waitFor('[data-click="profile_icon"]');
-        }catch(error){
-            console.log('falhei Mr Robot');
-            process.exit(0);
-
-        }
-
-        const currentCookies = await page.cookies();
-
-        fs.writeFileSync('./cookies.json', JSON.stringify(currentCookies));
-        
-        
-    }
-    debugger;
-
+    await page.goto(login);
+    await page.waitFor('input[name="email"]');
+    await page.type('input[name="email"]', user,{delay:100});
+    await page.type('input[name="pass"]', pass,{delay:100});
+    await page.keyboard.press(String.fromCharCode(13));
+    await page.waitFor('a[target=_self');
+    await page.click('a[target=_self');
 })();
